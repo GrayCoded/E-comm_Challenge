@@ -16,7 +16,6 @@ Category.init(
     Category_Name: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      type: DataTypes.INTEGER,
     },
   },
   {
