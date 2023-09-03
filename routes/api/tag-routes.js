@@ -1,7 +1,6 @@
 const router = require('express').Router();
 const { Tag, Product, ProductTag } = require('../../models');
 
-
 router.get('/', async (req, res) => {
   try {
     const tags = await Tag.findAll({
@@ -12,28 +11,29 @@ router.get('/', async (req, res) => {
     });
     res.json(tags);
   } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: " Cannot Find Tags.", err });
+    console.error(err);
+    res.status(500).json({ message: "Cannot find tags.", error: err });
   }
 });
 
 router.get('/:id', async (req, res) => {
   try {
-    const tags = await Tag.findByPk(req.params.id, {
+    const tag = await Tag.findByPk(req.params.id, {
       include: {
         model: Product,
         through: ProductTag,
       },
     });
 
-    if (!category) {
-      res.status(404).json({ message: 'Tag Not Found.' });
+    if (!tag) {
+      res.status(404).json({ message: 'Tag not found.' });
       return;
     }
 
-    res.status(200).json(category);
+    res.status(200).json(tag);
   } catch (err) {
-    res.status(500).json(err);
+    console.error(err);
+    res.status(500).json({ message: 'Error finding tag.', error: err });
   }
 });
 
@@ -42,42 +42,42 @@ router.post('/', async (req, res) => {
     const tag = await Tag.create(req.body);
     res.json(tag);
   } catch (err) {
-    res.status(500).json({ message: "Tag Cannot Be Created.", error: err });
+    console.error(err);
+    res.status(500).json({ message: "Tag cannot be created.", error: err });
   }
 });
 
-
 router.put('/:id', async (req, res) => {
-  const tag_id = req.params.id;
   try {
-    await Tag.update(req.body, {
-      where: {
-        id: id_tag,
-      },
-    });
-    if (!tag_id) {
-      return res.status(404).json({ message: 'Tag Not Found.' });
-    }
-    return res.status(200).json({ message: 'Tag Updated Successfully.' });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ message: 'Tag Could Not Update.' })
-  }
+    const tag = await Tag.findByPk(req.params.id);
 
+    if (!tag) {
+      return res.status(404).json({ message: 'Tag not found.' });
+    }
+
+    await tag.update(req.body);
+
+    res.status(200).json({ message: 'Tag updated successfully.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Tag could not be updated.', error: err });
+  }
 });
 
 router.delete('/:id', async (req, res) => {
   try {
     const tag = await Tag.findByPk(req.params.id);
-    if (!tag) {
-      return res.status(500).json({ message: 'Cannot Find Tag.', error: err })
-    }
-    await tag.destroy();
-    res.json('Tag Deleted Successfully.');
-  } catch (err) {
-    res.status(500).json({ message: 'Cannot Delete Tag.', error: err });
-  }
 
+    if (!tag) {
+      return res.status(404).json({ message: 'Tag not found.' });
+    }
+
+    await tag.destroy();
+    res.json('Tag deleted successfully.');
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Tag could not be deleted.', error: err });
+  }
 });
 
 module.exports = router;
