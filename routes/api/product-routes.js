@@ -6,10 +6,10 @@ const { Product, Category, Tag, ProductTag } = require('../../models');
 // get all products
 router.get('/', async (req, res) => {
   try {
-    const productData = await Product.findAll({
+    const products = await Product.findAll({
       include: [{ model: Category }, { model: Tag, through: ProductTag }],
     });
-    res.status(200).json(productData);
+    res.status(200).json(products);
   } catch (err) {
     res.status(500).json(err);
   }
@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
 
     const product = await Product.create(req.body);
 
-    if (Array.isArray(req.body.tagIds) && req.body.tagIds.length > 0) {
+    if (req.body.tagIds.length) {
       const productTagIdArr = req.body.tagIds.map((tag_id) => ({
         product_id: product.id,
         tag_id,
